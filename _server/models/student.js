@@ -7,17 +7,18 @@ module.exports = (sequelize, DataTypes) => {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
+     * The models/index file will call this method automatically.
      */
     static associate(models) {
       // define association here
+      student.belongsTo(models.major, { foreignKey: 'major_id' });
     }
   }
   student.init({
     firstName: DataTypes.STRING,
     lastName: DataTypes.STRING,
-    classes: DataTypes.ENUM,
-    gender: DataTypes.ENUM,
+    classes: DataTypes.ENUM('X', 'XI', 'XII'),
+    gender: DataTypes.ENUM('M', 'F'),
     major_id: DataTypes.INTEGER
   }, {
     sequelize,
