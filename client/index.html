@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aplikasi Chatting</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body, html {
+      height: 100%;
+      background-color: #f1f3f5;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 600px; /* Maksimal 600px saja */
+      height: 90vh;
+      margin: 2rem auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      padding: 1rem;
+      border-bottom: 1px solid #dee2e6;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #f8f9fa;
+    }
+    .chat-input {
+      padding: 1rem;
+      border-top: 1px solid #dee2e6;
+      background-color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <!-- Header -->
+  <div class="chat-header">
+    Ruang Gibah XI PPLG1
+  </div>
+
+  <!-- Pesan Chat -->
+  <div class="chat-messages" id="chatMessages">
+    <!-- Pesan akan muncul di sini -->
+  </div>
+
+  <!-- Input Chat -->
+  <div class="chat-input">
+    <div class="row g-2">
+      <div class="col-4">
+        <input type="text" id="nameInput" class="form-control" placeholder="Nama Anda">
+      </div>
+      <div class="col-6">
+        <input type="text" id="messageInput" class="form-control" placeholder="Ketik pesan...">
+      </div>
+      <div class="col-2 d-grid">
+        <button class="btn btn-primary" onclick="sendMessage()">Kirim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const socket = new WebSocket('ws://http://127.0.0.1:3001')
+
+  socket.onopen = () => console.log(`CONNECT TO SERVER`)
+  socket.onmessage = async (event) => {
+    console.log(`ON MESSAGE: ${JSON.stringify(event?.data)}`)
+  }
+
+  socket.onerror = (event) => console.log(`ON ERROR: ${JSON.stringify(event)}`)
+  socket.onclose = () => console.log(`ON CLOSE: ${JSON.stringify(event)}`)
+
+function sendMessage() {
+  const name = document.getElementById('nameInput').value.trim();
+  const message = document.getElementById('messageInput').value.trim();
+  const chatMessages = document.getElementById('chatMessages');
+  fetch("http://127.0.0.1:3001/send-message", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      name: name,
+      message: message
+    })
+  }).then (res => console.log(res))
+  .then(async (Response) => await console.log(`Response 2: ${JSON.stringify(response)}`))
+  .catch(err => console.log(`on error ${JSON.stringify(err)}`))
+
+  if (name === '' || message === '') {
+    alert('Nama dan Pesan harus diisi!');
+    return;
+  }
+
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('mb-3');
+
+  messageElement.innerHTML = `
+    <div class="d-flex">
+      <div class="me-2">
+        <span class="badge bg-primary">${name}</span>
+      </div>
+      <div>
+        <div class="bg-white p-2 rounded shadow-sm">${message}</div>
+      </div>
+    </div>
+  `;
+
+  chatMessages.appendChild(messageElement);
+
+  // Kosongkan input pesan setelah kirim
+  document.getElementById('messageInput').value = '';
+
+  // Scroll otomatis ke bawah
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
